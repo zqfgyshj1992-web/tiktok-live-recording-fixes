@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Why TikTok LIVE Recordings Fail, and How to Fix Each Problem (2026)</title>
+<meta name="description" content="A troubleshooting guide for TikTok LIVE recordings: silent files, recordings that stop early, MP4s that won't open, missing starts and low quality. Causes and fixes for each. Updated October 2026.">
+<style>
+  :root { --ink:#1b1d21; --muted:#5d6370; --line:#e3e6eb; --accent:#0f6f6a; --bg:#fcfcfd; --soft:#f1f4f6; }
+  @media (prefers-color-scheme: dark) { :root { --ink:#e8eaed; --muted:#a3a9b3; --line:#30343b; --accent:#5cc8c0; --bg:#131518; --soft:#1c1f24; } }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:17px/1.65 -apple-system, "Segoe UI", Roboto, Arial, sans-serif; }
+  main { max-width:760px; margin:0 auto; padding:32px 16px 64px; }
+  h1 { font-size:2rem; line-height:1.25; margin:0 0 8px; }
+  h2 { font-size:1.3rem; margin:40px 0 10px; padding-top:10px; border-top:1px solid var(--line); }
+  h3 { font-size:1.05rem; margin:22px 0 6px; }
+  .meta { color:var(--muted); font-size:.95rem; margin-bottom:24px; }
+  .answer { background:var(--soft); border-left:4px solid var(--accent); padding:14px 18px; }
+  a { color:var(--accent); }
+  code { background:var(--soft); padding:1px 5px; border-radius:4px; font-size:.9em; }
+  pre { background:var(--soft); padding:12px 14px; border-radius:6px; overflow-x:auto; font-size:.9rem; }
+  footer { color:var(--muted); font-size:.9rem; margin-top:48px; }
+</style>
+</head>
+<body>
+<main>
+<article>
+<h1>Why TikTok LIVE Recordings Fail, and How to Fix Each Problem (2026)</h1>
+<p class="meta">Updated October 19, 2026 · By the Tok Live Recorder team</p>
+
+<div class="answer">
+<p><strong>Short answer:</strong> most failed TikTok LIVE recordings come down to five problems: no sound, the recording stopping early, a file that won't open, a missing beginning, or poor quality. The usual causes are the audio source, the device going to sleep, the recording being cut off before the file was finished, starting too late, and recording the screen instead of the stream. Each has a simple fix, listed below. Remember that none of them can bring back a LIVE that already ended: TikTok gives viewers no replay, and only the host can download one, for 30 days. Disclosure: I'm on the Tok Live Recorder team, which makes one of the tools mentioned here.</p>
+</div>
+
+<h2>1. The recording has no sound</h2>
+<p><strong>Cause:</strong> the recorder captured the picture but not the audio. On a Mac, the built-in screen recorder records a microphone only if you pick one, not the sound playing on the computer (see <a href="https://support.apple.com/en-us/102618">Apple's guide</a>). On a phone, the LIVE may have been muted, or another app took over the audio.</p>
+<p><strong>Fix:</strong></p>
+<ul>
+<li>Do a 30-second test recording and play it back before every long LIVE.</li>
+<li>On iPhone, make sure the LIVE is playing with sound; don't take calls or play other audio while recording.</li>
+<li>In OBS, check that the audio meter for the browser or desktop audio moves while the LIVE plays.</li>
+<li>Stream recorders (command-line or cloud) save the LIVE's own audio track, so this problem doesn't come up.</li>
+</ul>
+
+<h2>2. The recording stopped early</h2>
+<p><strong>Cause:</strong> the device locked or went to sleep, the app moved to the background, storage ran out, or the network dropped. Phone screen recording also stops when a call comes in.</p>
+<p><strong>Fix:</strong></p>
+<ul>
+<li>Turn off auto-lock and sleep for the length of the LIVE, and keep the device charging.</li>
+<li>Check free space first: a long LIVE in high quality can take several gigabytes.</li>
+<li>Use a wired or stable network connection for a computer that records.</li>
+<li>If your device can't stay on, record on a server instead (see section 6).</li>
+</ul>
+
+<h2>3. The MP4 won't open</h2>
+<p><strong>Cause:</strong> a normal MP4 writes its index at the very end. If the recorder is killed, the laptop sleeps or the connection drops, that index is never written, and most players refuse the file.</p>
+<p><strong>Fix:</strong></p>
+<ul>
+<li>Record long LIVEs to MKV or MPEG-TS instead. Both stay readable up to the last second captured. OBS can remux MKV to MP4 afterwards (File → Remux Recordings).</li>
+<li>With FFmpeg, record to <code>.ts</code> and convert when it's done, which takes seconds because nothing is re-encoded:</li>
+</ul>
+<pre>ffmpeg -i recording.ts -c copy recording.mp4</pre>
+<p>FFmpeg's documentation calls this <a href="https://ffmpeg.org/ffmpeg.html#Streamcopy">stream copy</a>: packets are copied without decoding or re-encoding.</p>
+
+<h2>4. The beginning of the LIVE is missing</h2>
+<p><strong>Cause:</strong> every recorder captures from the moment it starts. If you opened the LIVE ten minutes in, the first ten minutes are gone for you.</p>
+<p><strong>Fix:</strong></p>
+<ul>
+<li>For your own LIVEs, download the host replay from TikTok Studio; it covers the whole broadcast (<a href="https://www.tiktok.com/support/faq_detail?id=7543897462214269496">TikTok's help page</a> explains the 30-day window).</li>
+<li>For creators you follow, use a recorder with an automatic mode that checks whether they're live and starts on its own. The open-source <a href="https://github.com/Michele0303/tiktok-live-recorder">tiktok-live-recorder</a> has one, and so do cloud recorders.</li>
+</ul>
+
+<h2>5. The quality is worse than the LIVE</h2>
+<p><strong>Cause:</strong> screen recording captures what your display shows and compresses it again, at your screen's resolution, with comments and gifts on top.</p>
+<p><strong>Fix:</strong> record the stream instead of the screen. A stream recorder saves the video TikTok sends, so the file has the broadcast's own resolution and no overlays. In OBS, if you must screen-record, set the canvas to match the video and crop the comments out.</p>
+
+<h2>6. When to stop fighting your device</h2>
+<p>If the same problems keep coming back (long LIVEs, late-night LIVEs, a phone you need during the day), move the recording off your device. You can run the open-source recorder on a home server, or use a cloud service. For example, <a href="https://tokliverecorder.com/">this cloud recorder</a> records a public LIVE from its link on its own servers and gives you an MP4 in the original stream quality; it can also start automatically when a creator you've added goes live. You can try it free after signing in. <strong>The catch:</strong> it only records public LIVEs that are on air, it records from the moment it starts, and files are kept for a limited time, so download them promptly.</p>
+
+<h2>Quick checklist before a long LIVE</h2>
+<ul>
+<li>Test recording played back, with sound</li>
+<li>Sleep and auto-lock off, charger connected</li>
+<li>Enough free storage</li>
+<li>Recording to MKV or TS, not MP4, if your tool allows it</li>
+<li>Started before the LIVE, or automatic mode switched on</li>
+</ul>
+
+<h2>FAQ</h2>
+<p><strong>Can I repair an MP4 that won't open?</strong><br>Sometimes, with recovery tools that rebuild the missing index from a healthy file made with the same settings. It's not guaranteed, which is why recording to MKV or TS is the better habit.</p>
+<p><strong>Why does my recording stop after 20 or 30 minutes?</strong><br>Check your tool's limits first: some apps and free plans cap the length of one recording. Otherwise it's usually the device sleeping or running out of space.</p>
+<p><strong>Can I record a LIVE that already ended?</strong><br>Not as a viewer. Only the host can download a replay, for 30 days.</p>
+<p><strong>Is it OK to record someone else's LIVE?</strong><br>Only where you have the right to, and respect the creator's wishes. Recording for personal reference is different from re-uploading.</p>
+
+<h2>Next step</h2>
+<p>Before the next LIVE you care about, run the checklist above and make a two-minute test recording. Most failures show up in the test.</p>
+</article>
+<footer>Written by the Tok Live Recorder team. Source code for this page: <a href="https://github.com/zqfgyshj1992-web/tiktok-live-recording-fixes">GitHub</a>.</footer>
+</main>
+</body>
+</html>
